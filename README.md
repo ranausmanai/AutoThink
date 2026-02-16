@@ -127,15 +127,26 @@ Or just use `verbose=True` (the default) which auto-configures a console handler
 
 ## Benchmarks
 
-AutoThink V4 is competitive with FLAML and AutoGluon on standard tabular tasks:
+Benchmark run date: **February 17, 2026**.
 
-| Dataset | AutoThink V4 | FLAML | AutoGluon |
-|---------|:------------:|:-----:|:---------:|
-| Heart Disease (AUC) | **0.918** | 0.912 | 0.920 |
-| Loan Default (AUC) | **0.874** | 0.869 | 0.871 |
-| House Price (RMSE) | 30,241 | 31,102 | **29,876** |
+### 60s Budget (same split, same seed, same metric)
 
-<sub>60-second time budget, single 80/20 split, seed=42. Lower RMSE is better.</sub>
+| Dataset | Metric | AutoThink V4 | FLAML | AutoGluon |
+|---------|--------|--------------|-------|-----------|
+| Heart Disease (binary, 10K) | AUC ↑ | 0.95752 (9.7s) | **0.95838 (60.1s)** | 0.95778 (8.5s) |
+| Loan Repayment (binary, 10K) | AUC ↑ | 0.93008 (13.6s) | **0.93054 (60.2s)** | 0.92840 (9.1s) |
+| House Price (regression, 5K) | RMSE ↓ | 30738.67 (11.1s) | **29668.72 (61.7s)** | 30045.56 (5.9s) |
+
+### Time vs Accuracy View
+
+| Dataset | AutoThink vs FLAML quality gap | AutoThink speedup vs FLAML |
+|---------|-------------------------------:|----------------------------:|
+| Heart Disease | -0.00086 AUC | **6.20x faster** |
+| Loan Repayment | -0.00046 AUC | **4.43x faster** |
+| House Price | +1069.94 RMSE | **5.56x faster** |
+
+<sub>Method: `python benchmark.py` with `TIME_BUDGET=60`, seed=42, single 80/20 split per dataset.</sub><br>
+<sub>Note: AutoGluon benchmark was run without FastAI extras (`autogluon.tabular[fastai]`), so some optional NN models were skipped.</sub>
 
 ---
 
