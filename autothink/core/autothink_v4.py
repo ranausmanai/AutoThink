@@ -47,8 +47,9 @@ class TaskDetector:
         n_unique = y.nunique()
         dtype = y.dtype
 
-        # Classification if: object/category, or numeric with few unique values
-        if dtype == 'object' or dtype.name == 'category':
+        # Classification if: object/category/string, or numeric with few unique values
+        is_string = not pd.api.types.is_numeric_dtype(dtype)
+        if is_string:
             task_type = 'binary' if n_unique == 2 else 'multiclass'
         elif n_unique <= 20:
             task_type = 'binary' if n_unique == 2 else 'multiclass'
@@ -58,7 +59,7 @@ class TaskDetector:
         # Encode target
         label_encoder = None
         if task_type in ('binary', 'multiclass'):
-            if dtype == 'object' or dtype.name == 'category':
+            if is_string:
                 label_encoder = LabelEncoder()
                 encoded_y = pd.Series(label_encoder.fit_transform(y), index=y.index)
             else:
