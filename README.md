@@ -127,26 +127,50 @@ Or just use `verbose=True` (the default) which auto-configures a console handler
 
 ## Benchmarks
 
-Benchmark run date: **February 17, 2026**.
+Benchmark run date: **February 16, 2026**.
 
-### 60s Budget (same split, same seed, same metric)
+### Credible Matrix (3 seeds x 3 budgets)
 
-| Dataset | Metric | AutoThink V4 | FLAML | AutoGluon |
-|---------|--------|--------------|-------|-----------|
-| Heart Disease (binary, 10K) | AUC ↑ | 0.95752 (9.7s) | **0.95838 (60.1s)** | 0.95778 (8.5s) |
-| Loan Repayment (binary, 10K) | AUC ↑ | 0.93008 (13.6s) | **0.93054 (60.2s)** | 0.92840 (9.1s) |
-| House Price (regression, 5K) | RMSE ↓ | 30738.67 (11.1s) | **29668.72 (61.7s)** | 30045.56 (5.9s) |
+- Seeds: `42, 1337, 2025`
+- Budgets: `10s, 30s, 60s`
+- Total fits: `81` (`3 datasets x 3 budgets x 3 seeds x 3 tools`)
+- All runs completed: `81/81`
 
-### Time vs Accuracy View
+Artifacts:
+- Raw runs: [`benchmarks/credible/benchmark_raw.csv`](benchmarks/credible/benchmark_raw.csv)
+- Aggregated summary: [`benchmarks/credible/benchmark_summary.csv`](benchmarks/credible/benchmark_summary.csv)
+- Full markdown report: [`benchmarks/credible/benchmark_report.md`](benchmarks/credible/benchmark_report.md)
+- Pareto chart (time vs quality): [`benchmarks/credible/pareto_by_budget.png`](benchmarks/credible/pareto_by_budget.png)
 
-| Dataset | AutoThink vs FLAML quality gap | AutoThink speedup vs FLAML |
-|---------|-------------------------------:|----------------------------:|
-| Heart Disease | -0.00086 AUC | **6.20x faster** |
-| Loan Repayment | -0.00046 AUC | **4.43x faster** |
-| House Price | +1069.94 RMSE | **5.56x faster** |
+<p align="center">
+  <img src="benchmarks/credible/pareto_by_budget.png" alt="Pareto plots of benchmark quality versus training time for AutoThink V4, FLAML, and AutoGluon at 10s, 30s, and 60s budgets." width="100%" />
+</p>
 
-<sub>Method: `python benchmark.py` with `TIME_BUDGET=60`, seed=42, single 80/20 split per dataset.</sub><br>
-<sub>Note: AutoGluon benchmark was run without FastAI extras (`autogluon.tabular[fastai]`), so some optional NN models were skipped.</sub>
+### Winner Counts (by dataset-budget cell)
+
+| Tool | Wins (out of 9) |
+|------|----------------:|
+| AutoThink V4 | **4** |
+| AutoGluon | 3 |
+| FLAML | 2 |
+
+### Detailed Means (+/-95% CI)
+
+| Budget | Dataset | AutoThink V4 | FLAML | AutoGluon |
+|--------|---------|--------------|-------|-----------|
+| 10s | Heart (AUC ↑) | **0.95299 +/- 0.00445** (9.32s) | 0.95245 +/- 0.00596 (10.07s) | 0.95245 +/- 0.00524 (7.95s) |
+| 10s | Loan (AUC ↑) | **0.91236 +/- 0.01778** (16.30s) | 0.90902 +/- 0.02191 (10.46s) | 0.91165 +/- 0.01683 (10.49s) |
+| 10s | House (RMSE ↓) | 31627.97 +/- 321.55 (11.39s) | 30917.18 +/- 260.50 (10.26s) | **30589.44 +/- 381.04** (6.57s) |
+| 30s | Heart (AUC ↑) | **0.95299 +/- 0.00445** (9.71s) | 0.95254 +/- 0.00518 (30.06s) | 0.95245 +/- 0.00524 (8.78s) |
+| 30s | Loan (AUC ↑) | **0.91236 +/- 0.01778** (15.18s) | 0.91191 +/- 0.01884 (30.42s) | 0.91165 +/- 0.01683 (11.23s) |
+| 30s | House (RMSE ↓) | 31627.97 +/- 321.55 (11.49s) | 30743.65 +/- 474.66 (30.99s) | **30589.44 +/- 381.04** (6.76s) |
+| 60s | Heart (AUC ↑) | 0.95299 +/- 0.00445 (11.20s) | **0.95335 +/- 0.00478** (60.24s) | 0.95245 +/- 0.00524 (10.02s) |
+| 60s | Loan (AUC ↑) | 0.91236 +/- 0.01778 (14.46s) | **0.91387 +/- 0.01779** (60.58s) | 0.91165 +/- 0.01683 (10.97s) |
+| 60s | House (RMSE ↓) | 31627.97 +/- 321.55 (11.64s) | 30623.40 +/- 476.28 (61.98s) | **30589.44 +/- 381.04** (6.76s) |
+
+<sub>Reproduce with: `python benchmark_matrix.py --budgets 10,30,60 --seeds 42,1337,2025 --outdir benchmarks/credible`</sub><br>
+<sub>Note: AutoGluon ran without FastAI extras (`autogluon.tabular[fastai]`), so optional NN models were skipped.</sub><br>
+<sub>Note: Some tools may slightly exceed nominal budget due to setup/cleanup and internal training loops.</sub>
 
 ---
 
